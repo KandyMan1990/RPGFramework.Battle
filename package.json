@@ -1,0 +1,21 @@
+{
+  "name": "com.rpgframework.battle",
+  "version": "0.1.0",
+  "displayName": "RPG Framework Battle",
+  "description": "Battle system for the RPG Framework",
+  "dependencies": {
+    "com.rpgframework.audio": "0.5.4",
+    "com.rpgframework.core": "0.7.0",
+    "com.rpgframework.di": "2.1.0",
+    "com.rpgframework.localisation": "1.0.1"
+  },
+  "unity": "6000.5",
+  "keywords": [
+    "RPG Framework",
+    "Battle"
+  ],
+  "author": {
+    "name": "Elliott Armstrong",
+    "url": "https://github.com/KandyMan1990/RPGFramework.Battle"
+  }
+}
