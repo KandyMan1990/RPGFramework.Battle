@@ -1,0 +1,22 @@
+{
+    "name": "RPGFramework.Battle",
+    "rootNamespace": "RPGFramework.Battle",
+    "references": [
+        "RPGFramework.Audio",
+        "RPGFramework.Core",
+        "RPGFramework.Core.SharedTypes",
+        "RPGFramework.DI",
+        "RPGFramework.Hashing",
+        "RPGFramework.Localisation",
+        "RPGFramework.Battle.SharedTypes"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
