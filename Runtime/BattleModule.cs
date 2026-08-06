@@ -56,7 +56,7 @@ namespace RPGFramework.Battle
             m_UIContainer = uIDocument.rootVisualElement;
         }
 
-        async Task IModule.OnEnterAsync(IModuleArgs _)
+        async Task IModule.OnEnterAsync()
         {
             await m_ScreenFadeService.FadeOutAsync(true);
 
