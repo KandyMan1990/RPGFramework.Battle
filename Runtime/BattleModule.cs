@@ -8,6 +8,7 @@ using RPGFramework.Core;
 using RPGFramework.Core.Input;
 using RPGFramework.Core.Rendering;
 using RPGFramework.Core.SharedTypes;
+using RPGFramework.Core.Store;
 using RPGFramework.DI;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -27,6 +28,8 @@ namespace RPGFramework.Battle
         private readonly ISfxPlayer                   m_SfxPlayer;
         private readonly IBattleAudioProvider         m_AudioProvider;
         private readonly IBattleArenaLoader           m_ArenaLoader;
+        private readonly IChangeModuleStore           m_ChangeModuleStore;
+        private readonly IResumeModuleStore           m_ResumeModuleStore;
 
         private InputAdapter m_InputAdapter;
         private BattleArgs   m_BattleArgs;
@@ -39,7 +42,9 @@ namespace RPGFramework.Battle
                             IMusicPlayer                 musicPlayer,
                             ISfxPlayer                   sfxPlayer,
                             IBattleAudioProvider         battleAudioProvider,
-                            IBattleArenaLoader           arenaLoader)
+                            IBattleArenaLoader           arenaLoader,
+                            IChangeModuleStore           changeModuleStore,
+                            IResumeModuleStore           resumeModuleStore)
         {
             m_CoreModule                  = coreModule;
             m_DIResolver                  = diResolver;
@@ -50,6 +55,8 @@ namespace RPGFramework.Battle
             m_SfxPlayer                   = sfxPlayer;
             m_AudioProvider               = battleAudioProvider;
             m_ArenaLoader                 = arenaLoader;
+            m_ChangeModuleStore           = changeModuleStore;
+            m_ResumeModuleStore           = resumeModuleStore;
             m_BattleModule                = this;
 
             UIDocument uIDocument = Object.FindAnyObjectByType<UIDocument>();
@@ -124,7 +131,7 @@ namespace RPGFramework.Battle
             {
                 m_BattleCompleteStateProvider.Set(BattleCompleteState.VICTORY);
 
-                ReturnToPreviousModuleAsync().FireAndForget();
+                LeaveBattleModuleAsync().FireAndForget();
                 return;
             }
 
@@ -150,7 +157,7 @@ namespace RPGFramework.Battle
                 return;
             }
 
-            ReturnToPreviousModuleAsync().FireAndForget();
+            LeaveBattleModuleAsync().FireAndForget();
         }
 
         private async Task VictorySequenceAsync()
@@ -171,7 +178,7 @@ namespace RPGFramework.Battle
                 return;
             }
 
-            await ReturnToPreviousModuleAsync();
+            await LeaveBattleModuleAsync();
         }
 
         private Task TransitionToSpoilsScreenAsync()
@@ -182,13 +189,17 @@ namespace RPGFramework.Battle
             // repeat until no more screens
 
             Debug.Log("TransitionToSpoilsScreenAsync");
-            return ReturnToPreviousModuleAsync();
+            return LeaveBattleModuleAsync();
         }
 
-        private Task ReturnToPreviousModuleAsync()
+        private Task LeaveBattleModuleAsync()
         {
-            Debug.Log("ReturnToPreviousModuleAsync");
-            return m_CoreModule.ResumeModuleAsync();
+            byte moduleId = m_ResumeModuleStore.GetModuleId;
+            m_ChangeModuleStore.SetModuleId(moduleId);
+            
+            Debug.Log($"LeaveBattleModuleAsync id [{moduleId}]");
+
+            return m_CoreModule.RequestModuleChangeAsync();
         }
     }
 }
