@@ -114,8 +114,6 @@ namespace RPGFramework.Battle
             await m_ScreenFadeService.FadeOutAsync();
 
             await m_ArenaLoader.UnloadAsync();
-
-            m_CoreModule.ResetModule<IBattleModule, BattleModule>();
         }
 
         private void SetBattleComplete(BattleCompleteState state)
