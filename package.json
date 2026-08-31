@@ -5,9 +5,12 @@
   "description": "Battle system for the RPG Framework",
   "dependencies": {
     "com.rpgframework.audio": "0.5.4",
+    "com.rpgframework.battle.sharedtypes": "0.1.0",
     "com.rpgframework.core": "0.7.0",
-    "com.rpgframework.di": "2.1.0",
-    "com.rpgframework.localisation": "1.0.1"
+    "com.rpgframework.core.sharedtypes": "0.2.0",
+    "com.rpgframework.di": "3.0.0",
+    "com.rpgframework.hashing": "2.0.1",
+    "com.rpgframework.localisation": "1.2.0"
   },
   "unity": "6000.5",
   "keywords": [
