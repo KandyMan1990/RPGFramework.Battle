@@ -69,7 +69,6 @@ namespace RPGFramework.Battle
 
             m_InputAdapter = Object.FindAnyObjectByType<InputAdapter>();
             m_DIResolver.InjectInto(m_InputAdapter);
-            m_InputAdapter.Disable();
 
             m_BattleCompleteStateProvider.Set(BattleCompleteState.BATTLE_STILL_ACTIVE);
 
