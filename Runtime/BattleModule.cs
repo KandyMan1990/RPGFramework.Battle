@@ -161,11 +161,11 @@ namespace RPGFramework.Battle
         {
             Debug.Log("VictorySequenceAsync");
 
-            await m_MusicPlayer.Stop();
+            await m_MusicPlayer.StopAsync();
 
             // TODO: use correct victory music ID
-            int winId = m_AudioProvider.GetVictoryMusicId;
-            await m_MusicPlayer.Play(winId);
+            ulong winId = m_AudioProvider.GetVictoryMusicId;
+            await m_MusicPlayer.PlayAsync(winId);
 
             // TODO: await any victory dances/ui popup etc
 
