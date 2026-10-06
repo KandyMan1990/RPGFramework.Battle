@@ -9,13 +9,13 @@ using UnityEngine.UIElements;
 namespace RPGFramework.Battle.Editor
 {
     [Serializable]
-    public class BattleArenaDatabaseAssetAuthoring
+    internal class BattleArenaDatabaseAssetAuthoring
     {
         public GameObject Prefab;
     }
 
     [CreateAssetMenu(fileName = "Battle Arena Database", menuName = "RPG Framework/Battle/Battle Arena Database")]
-    public class BattleArenaDatabaseScriptableObject : ScriptableObject
+    internal class BattleArenaDatabaseScriptableObject : ScriptableObject
     {
         private readonly string m_AssetBundlesPath = Path.Combine(Application.streamingAssetsPath, "Battle");
 
@@ -120,7 +120,7 @@ namespace RPGFramework.Battle.Editor
     }
 
     [CustomEditor(typeof(BattleArenaDatabaseScriptableObject))]
-    public class BattleArenaDatabaseScriptableObjectEditor : UnityEditor.Editor
+    internal class BattleArenaDatabaseScriptableObjectEditor : UnityEditor.Editor
     {
         private ModalWindow m_Window;
 
