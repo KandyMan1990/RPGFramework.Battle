@@ -4,8 +4,12 @@ using UnityEngine;
 
 namespace RPGFramework.Battle.Providers
 {
+    /// <summary>
+    /// The music a battle plays itself: its victory fanfare. The battle music is Core's stored setting.
+    /// </summary>
     public interface IBattleAudioProvider
     {
+        /// <summary>The victory fanfare's music asset name hash.</summary>
         ulong VictoryMusicId { get; }
     }
 

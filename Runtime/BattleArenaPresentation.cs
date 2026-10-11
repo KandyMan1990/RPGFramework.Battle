@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace RPGFramework.Battle
 {
+    /// <summary>
+    /// How an arena gets into the battle's scene: the game's choice, bound in the battle's installer.
+    /// </summary>
     public interface IBattleArenaPresentation
     {
         /// <summary>
