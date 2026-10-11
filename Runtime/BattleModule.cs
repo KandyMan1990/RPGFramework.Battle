@@ -135,15 +135,13 @@ namespace RPGFramework.Battle
             // write hp/status effects to save map
             // add spoils to inventory
 
-            if (state == BattleCompleteState.GAME_OVER && m_BattleArgs.HasFlag(BattleFlags.DISABLE_GAME_OVER))
-            {
-                m_BattleCompleteStateStore.Set(BattleCompleteState.VICTORY);
+            m_BattleCompleteStateStore.Set(state);
 
+            if (state == BattleCompleteState.GAME_OVER || state == BattleCompleteState.OUT_OF_TIME)
+            {
                 LeaveBattleModuleAsync().FireAndForget();
                 return;
             }
-
-            m_BattleCompleteStateStore.Set(state);
 
             if (state == BattleCompleteState.ESCAPE)
             {
@@ -153,13 +151,13 @@ namespace RPGFramework.Battle
 
             // at this point we're at state == BattleCompleteState.VICTORY
 
-            if (!m_BattleArgs.HasFlag(BattleFlags.DISABLE_VICTORY))
+            if (!m_BattleArgs.HasFlag(BattleFlags.DISABLE_VICTORY_FANFARE))
             {
                 VictorySequenceAsync().FireAndForget();
                 return;
             }
 
-            if (!m_BattleArgs.HasFlag(BattleFlags.DISABLE_SPOILS))
+            if (!m_BattleArgs.HasFlag(BattleFlags.DISABLE_ITEM_AND_EXP_GAIN))
             {
                 TransitionToSpoilsScreenAsync().FireAndForget();
                 return;
@@ -179,8 +177,9 @@ namespace RPGFramework.Battle
             await m_MusicPlayer.PlayAsync(winId);
 
             // TODO: await any victory dances/ui popup etc
+            await Awaitable.WaitForSecondsAsync(4f);
 
-            if (!m_BattleArgs.HasFlag(BattleFlags.DISABLE_SPOILS))
+            if (!m_BattleArgs.HasFlag(BattleFlags.DISABLE_ITEM_AND_EXP_GAIN))
             {
                 await TransitionToSpoilsScreenAsync();
                 return;
