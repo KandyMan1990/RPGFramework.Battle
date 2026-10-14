@@ -19,6 +19,7 @@ namespace RPGFramework.Battle
     {
         private readonly ICoreModule               m_CoreModule;
         private readonly IDIResolver               m_DIResolver;
+        private readonly IInputRouter              m_InputRouter;
         private readonly IScreenFadeService        m_ScreenFadeService;
         private readonly IBattleArgsStore          m_BattleArgsStore;
         private readonly IBattleCompleteStateStore m_BattleCompleteStateStore;
@@ -35,6 +36,7 @@ namespace RPGFramework.Battle
 
         public BattleModule(ICoreModule               coreModule,
                             IDIResolver               diResolver,
+                            IInputRouter              inputRouter,
                             IScreenFadeService        screenFadeService,
                             IBattleArgsStore          battleArgsStore,
                             IBattleCompleteStateStore battleCompleteStateStore,
@@ -46,6 +48,7 @@ namespace RPGFramework.Battle
         {
             m_CoreModule               = coreModule;
             m_DIResolver               = diResolver;
+            m_InputRouter              = inputRouter;
             m_ScreenFadeService        = screenFadeService;
             m_BattleArgsStore          = battleArgsStore;
             m_BattleCompleteStateStore = battleCompleteStateStore;
@@ -96,10 +99,21 @@ namespace RPGFramework.Battle
             // TODO:
             // start battle state machine
 
-            // TODO: temp tor testing, remove
-            await Awaitable.WaitForSecondsAsync(3f);
+            // TODO: temporary, for testing, remove: won after three seconds, or lost if Cancel is pressed first
+            TemporaryResultInputContext resultInput = new TemporaryResultInputContext();
+            m_InputRouter.Push(resultInput);
 
-            SetBattleComplete(BattleCompleteState.VICTORY);
+            float waited = 0f;
+
+            while (waited < 3f && !resultInput.CancelPressed)
+            {
+                await Awaitable.NextFrameAsync();
+                waited += Time.deltaTime;
+            }
+
+            m_InputRouter.Pop(resultInput);
+
+            SetBattleComplete(resultInput.CancelPressed ? BattleCompleteState.DEFEAT : BattleCompleteState.VICTORY);
         }
 
         async Task IModule.OnExitAsync()
@@ -137,7 +151,7 @@ namespace RPGFramework.Battle
 
             m_BattleCompleteStateStore.Set(state);
 
-            if (state == BattleCompleteState.GAME_OVER || state == BattleCompleteState.OUT_OF_TIME)
+            if (state == BattleCompleteState.DEFEAT || state == BattleCompleteState.OUT_OF_TIME)
             {
                 LeaveBattleModuleAsync().FireAndForget();
                 return;
@@ -203,5 +217,23 @@ namespace RPGFramework.Battle
         {
             return m_CoreModule.RequestModuleChangeAsync(BattleOutcomes.FINISHED);
         }
+    }
+
+    // TODO: temporary, for testing, remove with the placeholder result above.
+    internal sealed class TemporaryResultInputContext : IInputContext
+    {
+        internal bool CancelPressed { get; private set; }
+
+        bool IInputContext.Handle(ControlSlot slot)
+        {
+            if (slot == ControlSlot.Secondary)
+            {
+                CancelPressed = true;
+            }
+
+            return true;
+        }
+
+        bool IInputContext.HandleMove(Vector2 move) => true;
     }
 }
