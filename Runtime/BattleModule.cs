@@ -7,7 +7,6 @@ using RPGFramework.Battle.SharedTypes.Constants;
 using RPGFramework.Battle.SharedTypes.Stores;
 using RPGFramework.Core;
 using RPGFramework.Core.Input;
-using RPGFramework.Core.Rendering;
 using RPGFramework.Core.SharedTypes;
 using RPGFramework.DI;
 using UnityEngine;
@@ -20,7 +19,6 @@ namespace RPGFramework.Battle
         private readonly ICoreModule               m_CoreModule;
         private readonly IDIResolver               m_DIResolver;
         private readonly IInputRouter              m_InputRouter;
-        private readonly IScreenFadeService        m_ScreenFadeService;
         private readonly IBattleArgsStore          m_BattleArgsStore;
         private readonly IBattleCompleteStateStore m_BattleCompleteStateStore;
         private readonly IBattleModule             m_BattleModule;
@@ -37,7 +35,6 @@ namespace RPGFramework.Battle
         public BattleModule(ICoreModule               coreModule,
                             IDIResolver               diResolver,
                             IInputRouter              inputRouter,
-                            IScreenFadeService        screenFadeService,
                             IBattleArgsStore          battleArgsStore,
                             IBattleCompleteStateStore battleCompleteStateStore,
                             IMusicPlayer              musicPlayer,
@@ -49,7 +46,6 @@ namespace RPGFramework.Battle
             m_CoreModule               = coreModule;
             m_DIResolver               = diResolver;
             m_InputRouter              = inputRouter;
-            m_ScreenFadeService        = screenFadeService;
             m_BattleArgsStore          = battleArgsStore;
             m_BattleCompleteStateStore = battleCompleteStateStore;
             m_MusicPlayer              = musicPlayer;
@@ -65,8 +61,6 @@ namespace RPGFramework.Battle
 
         async Task IModule.OnEnterAsync(byte entry)
         {
-            await m_ScreenFadeService.FadeOutAsync(true);
-
             m_InputAdapter = m_ModuleScene.Find<InputAdapter>();
             m_DIResolver.InjectInto(m_InputAdapter);
 
@@ -85,10 +79,10 @@ namespace RPGFramework.Battle
             // load and init players
             // load and init enemies
             // resolve appropriate battle flags (back attack, preemptive etc)
+        }
 
-            m_ScreenFadeService.SetFadeToBattleReveal();
-            await m_ScreenFadeService.FadeInAsync();
-
+        void IModule.OnRevealed()
+        {
             // TODO:
             // await any background intro (camera movement etc)
             // await any character reveals (could be fade in + sfx)
@@ -99,6 +93,11 @@ namespace RPGFramework.Battle
             // TODO:
             // start battle state machine
 
+            RunPlaceholderAsync().FireAndForget();
+        }
+
+        private async Task RunPlaceholderAsync()
+        {
             // TODO: temporary, for testing, remove: won after three seconds, or lost if Cancel is pressed first
             TemporaryResultInputContext resultInput = new TemporaryResultInputContext();
             m_InputRouter.Push(resultInput);
@@ -120,9 +119,6 @@ namespace RPGFramework.Battle
         {
             m_InputAdapter.Disable();
 
-            m_ScreenFadeService.SetFadeToSimple();
-            await m_ScreenFadeService.FadeOutAsync();
-
             await m_ArenaLoader.UnloadAsync();
         }
 
@@ -135,8 +131,6 @@ namespace RPGFramework.Battle
 
         Task IModule.OnResumeAsync()
         {
-            m_InputAdapter.Enable();
-
             return Task.CompletedTask;
         }
 
