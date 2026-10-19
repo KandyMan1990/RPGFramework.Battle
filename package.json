@@ -10,7 +10,7 @@
     "com.rpgframework.core.sharedtypes": "0.3.0",
     "com.rpgframework.di": "4.0.3",
     "com.rpgframework.hashing": "2.0.2",
-    "com.rpgframework.localisation": "2.1.0"
+    "com.rpgframework.localisation": "2.1.1"
   },
   "unity": "6000.5",
   "keywords": [
