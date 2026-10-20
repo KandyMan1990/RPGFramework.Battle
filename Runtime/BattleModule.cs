@@ -14,7 +14,7 @@ using UnityEngine.UIElements;
 
 namespace RPGFramework.Battle
 {
-    public class BattleModule : IBattleModule
+    public sealed class BattleModule : IBattleModule
     {
         private readonly ICoreModule               m_CoreModule;
         private readonly IDIResolver               m_DIResolver;

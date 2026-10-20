@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace RPGFramework.Battle
 {
-    internal class BattleModuleMonoBehaviour : MonoBehaviour
+    internal sealed class BattleModuleMonoBehaviour : MonoBehaviour
     {
     }
 }

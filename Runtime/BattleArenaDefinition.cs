@@ -1,6 +1,6 @@
 namespace RPGFramework.Battle
 {
-    public class BattleArenaDefinition
+    public sealed class BattleArenaDefinition
     {
         public string AssetName { get; }
         public string AssetPath { get; }

@@ -14,7 +14,7 @@ namespace RPGFramework.Battle.Providers
     }
 
     [CreateAssetMenu(menuName = "RPG Framework/Audio/Battle Audio Provider", fileName = "Battle Audio Provider")]
-    public class BattleAudioProvider : ScriptableObject, IBattleAudioProvider
+    public sealed class BattleAudioProvider : ScriptableObject, IBattleAudioProvider
     {
         [SerializeField]
         private MusicAsset m_VictoryMusicName;
