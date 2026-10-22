@@ -42,14 +42,19 @@ namespace RPGFramework.Battle.Editor
             sb.AppendLine($"// Last generated at {DateTime.UtcNow}\n");
 
             sb.AppendLine("using RPGFramework.Battle;");
+            sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using System.IO;");
             sb.AppendLine("using RPGFramework.Battle.Databases;");
+            sb.AppendLine("using RPGFramework.Battle.SharedTypes;");
             sb.AppendLine("using UnityEngine;");
             sb.AppendLine();
             sb.AppendLine($"namespace {namespaceForScript}");
             sb.AppendLine("{");
 
-            sb.AppendLine($"\tinternal class {scriptFileName.Replace(" ", "")} : IBattleArenaDatabase");
+            sb.AppendLine($"\tinternal sealed class {scriptFileName.Replace(" ", "")} : IBattleArenaDatabase");
+            sb.AppendLine("#if ENABLE_RPG_FRAMEWORK_DEBUG");
+            sb.AppendLine("\t\t, IDebugBattleArenaDatabase");
+            sb.AppendLine("#endif");
             sb.AppendLine("\t{");
             sb.AppendLine("\t\tprivate readonly BattleArenaDefinition[] m_Arenas;");
             sb.AppendLine();
@@ -74,6 +79,18 @@ namespace RPGFramework.Battle.Editor
             sb.AppendLine("\t\t{");
             sb.AppendLine("\t\t\treturn m_Arenas[index];");
             sb.AppendLine("\t\t}");
+
+            sb.AppendLine();
+            sb.AppendLine("#if ENABLE_RPG_FRAMEWORK_DEBUG");
+            sb.AppendLine("\t\tIReadOnlyList<string> IDebugBattleArenaDatabase.ArenaNames => new string[]");
+            sb.AppendLine("\t\t{");
+            for (int i = 0; i < m_Arenas.Length; i++)
+            {
+                sb.AppendLine($"\t\t\t\"{m_Arenas[i].Prefab.name}\",");
+            }
+
+            sb.AppendLine("\t\t};");
+            sb.AppendLine("#endif");
 
             sb.AppendLine("\t}");
 
