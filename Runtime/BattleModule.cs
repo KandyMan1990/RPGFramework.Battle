@@ -228,6 +228,6 @@ namespace RPGFramework.Battle
             return true;
         }
 
-        bool IInputContext.HandleMove(Vector2 move) => true;
+        bool IInputContext.TakesMovement => true;
     }
 }
