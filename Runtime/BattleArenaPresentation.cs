@@ -21,7 +21,7 @@ namespace RPGFramework.Battle
         Task UnloadAsync();
     }
 
-    public sealed class BattleArenaPresentation : IBattleArenaPresentation
+    internal sealed class BattleArenaPresentation : IBattleArenaPresentation
     {
         private GameObject  m_Instance;
         private AssetBundle m_AssetBundle;

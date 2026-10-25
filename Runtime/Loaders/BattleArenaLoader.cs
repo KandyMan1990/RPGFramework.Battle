@@ -14,7 +14,7 @@ namespace RPGFramework.Battle.Loaders
         Task UnloadAsync();
     }
 
-    public sealed class BattleArenaLoader : IBattleArenaLoader
+    internal sealed class BattleArenaLoader : IBattleArenaLoader
     {
         private readonly IBattleArenaDatabase     m_ArenaDatabase;
         private readonly IBattleArenaPresentation m_ArenaPresentation;
