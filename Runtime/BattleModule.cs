@@ -7,14 +7,17 @@ using RPGFramework.Battle.SharedTypes.Constants;
 using RPGFramework.Battle.SharedTypes.Stores;
 using RPGFramework.Core;
 using RPGFramework.Core.Input;
+using RPGFramework.Core.PlayerLoop;
 using RPGFramework.Core.SharedTypes;
+using RPGFramework.Core.Store;
+using RPGFramework.Core.UI;
 using RPGFramework.DI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace RPGFramework.Battle
 {
-    internal sealed class BattleModule : IBattleModule
+    internal sealed class BattleModule : IBattleModule, IUpdatable
     {
         private readonly ICoreModule               m_CoreModule;
         private readonly IDIResolver               m_DIResolver;
@@ -27,10 +30,14 @@ namespace RPGFramework.Battle
         private readonly ISfxPlayer                m_SfxPlayer;
         private readonly IBattleAudioProvider      m_AudioProvider;
         private readonly IBattleArenaLoader        m_ArenaLoader;
+        private readonly ICountdownStore           m_CountdownStore;
+        private readonly IBattleModeStore          m_BattleModeStore;
+        private readonly CountdownLabel            m_Countdown;
         private readonly IModuleScene              m_ModuleScene;
 
         private InputAdapter m_InputAdapter;
         private BattleArgs   m_BattleArgs;
+        private bool         m_CarriesCountdown;
 
         public BattleModule(ICoreModule               coreModule,
                             IDIResolver               diResolver,
@@ -41,6 +48,8 @@ namespace RPGFramework.Battle
                             ISfxPlayer                sfxPlayer,
                             IBattleAudioProvider      battleAudioProvider,
                             IBattleArenaLoader        arenaLoader,
+                            ICountdownStore           countdownStore,
+                            IBattleModeStore          battleModeStore,
                             IModuleScene              moduleScene)
         {
             m_CoreModule               = coreModule;
@@ -52,6 +61,9 @@ namespace RPGFramework.Battle
             m_SfxPlayer                = sfxPlayer;
             m_AudioProvider            = battleAudioProvider;
             m_ArenaLoader              = arenaLoader;
+            m_CountdownStore           = countdownStore;
+            m_BattleModeStore          = battleModeStore;
+            m_Countdown                = new CountdownLabel(countdownStore);
             m_ModuleScene              = moduleScene;
             m_BattleModule             = this;
 
@@ -67,6 +79,17 @@ namespace RPGFramework.Battle
             m_BattleCompleteStateStore.Set(BattleCompleteState.BATTLE_STILL_ACTIVE);
 
             m_BattleArgs = m_BattleArgsStore.Args;
+
+            m_CarriesCountdown = m_CountdownStore.IsShown &&
+                                 (m_BattleArgs.HasFlag(BattleFlags.INHERIT_COUNTDOWN_TIMER) || (m_BattleModeStore.Mode & BattleFlags.INHERIT_COUNTDOWN_TIMER) != 0);
+
+            if (m_CarriesCountdown)
+            {
+                m_UIContainer.Add(m_Countdown);
+                m_Countdown.Tick(0f);
+
+                UpdateManager.RegisterUpdatable(this);
+            }
 
             // TODO: how to handle both a 3d arena and a 2d background?
             GameObject arenaGameObject = await m_ArenaLoader.LoadAsync(m_BattleArgs.Arena);
@@ -98,13 +121,14 @@ namespace RPGFramework.Battle
 
         private async Task RunPlaceholderAsync()
         {
-            // TODO: temporary, for testing, remove: won after three seconds, or lost if Cancel is pressed first
+            // TODO: temporary, for testing, remove: won after three seconds, lost if Cancel is pressed first, or out of time
+            // if a countdown it carries runs out first
             TemporaryResultInputContext resultInput = new TemporaryResultInputContext();
             m_InputRouter.Push(resultInput);
 
             float waited = 0f;
 
-            while (waited < 3f && !resultInput.CancelPressed)
+            while (waited < 3f && !resultInput.CancelPressed && !HasRunOutOfTime())
             {
                 await Awaitable.NextFrameAsync();
                 waited += Time.deltaTime;
@@ -112,12 +136,29 @@ namespace RPGFramework.Battle
 
             m_InputRouter.Pop(resultInput);
 
-            SetBattleComplete(resultInput.CancelPressed ? BattleCompleteState.DEFEAT : BattleCompleteState.VICTORY);
+            BattleCompleteState result = resultInput.CancelPressed ? BattleCompleteState.DEFEAT
+                                       : HasRunOutOfTime()         ? BattleCompleteState.OUT_OF_TIME
+                                                                   : BattleCompleteState.VICTORY;
+
+            SetBattleComplete(result);
+        }
+
+        private bool HasRunOutOfTime()
+        {
+            return m_CarriesCountdown && m_CountdownStore.Seconds == 0;
+        }
+
+        void IUpdatable.Update()
+        {
+            m_Countdown.Tick(Time.unscaledDeltaTime);
         }
 
         async Task IModule.OnExitAsync()
         {
             m_InputAdapter.Disable();
+            m_Countdown.RemoveFromHierarchy();
+
+            UpdateManager.UnregisterUpdatable(this);
 
             await m_ArenaLoader.UnloadAsync();
         }
