@@ -259,9 +259,9 @@ namespace RPGFramework.Battle
     {
         internal bool CancelPressed { get; private set; }
 
-        bool IInputContext.Handle(ControlSlot slot)
+        bool IInputContext.Handle(ulong action)
         {
-            if (slot == ControlSlot.Secondary)
+            if (action == CoreActions.Cancel)
             {
                 CancelPressed = true;
             }
