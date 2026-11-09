@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using RPGFramework.Hashing;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -56,17 +57,17 @@ namespace RPGFramework.Battle.Editor
             sb.AppendLine("\t\t, IDebugBattleArenaDatabase");
             sb.AppendLine("#endif");
             sb.AppendLine("\t{");
-            sb.AppendLine("\t\tprivate readonly BattleArenaDefinition[] m_Arenas;");
+            sb.AppendLine("\t\tprivate readonly Dictionary<ulong, BattleArenaDefinition> m_Arenas;");
             sb.AppendLine();
             sb.AppendLine($"\t\tinternal {scriptFileName.Replace(" ", "")}()");
             sb.AppendLine("\t\t{");
 
             sb.AppendLine("\t\t\tstring assetBundlesPath = Path.Combine(Application.streamingAssetsPath, \"Battle\");");
-            sb.AppendLine("\t\t\tm_Arenas = new BattleArenaDefinition[]");
+            sb.AppendLine("\t\t\tm_Arenas = new Dictionary<ulong, BattleArenaDefinition>");
             sb.AppendLine("\t\t\t{");
             for (int i = 0; i < m_Arenas.Length; i++)
             {
-                sb.AppendLine($"\t\t\t\tnew BattleArenaDefinition(\"{m_Arenas[i].Prefab.name}\", Path.Combine(assetBundlesPath, \"{m_Arenas[i].Prefab.name.ToLower()}\")),");
+                sb.AppendLine($"\t\t\t\t[0x{Fnv1a64.Hash(m_Arenas[i].Prefab.name):X16}UL] = new BattleArenaDefinition(\"{m_Arenas[i].Prefab.name}\", Path.Combine(assetBundlesPath, \"{m_Arenas[i].Prefab.name.ToLower()}\")),");
             }
 
             sb.AppendLine("\t\t\t};");
@@ -75,9 +76,9 @@ namespace RPGFramework.Battle.Editor
 
             sb.AppendLine();
 
-            sb.AppendLine("\t\tBattleArenaDefinition IBattleArenaDatabase.Get(int index)");
+            sb.AppendLine("\t\tBattleArenaDefinition IBattleArenaDatabase.Get(ulong nameHash)");
             sb.AppendLine("\t\t{");
-            sb.AppendLine("\t\t\treturn m_Arenas[index];");
+            sb.AppendLine("\t\t\treturn m_Arenas[nameHash];");
             sb.AppendLine("\t\t}");
 
             sb.AppendLine();

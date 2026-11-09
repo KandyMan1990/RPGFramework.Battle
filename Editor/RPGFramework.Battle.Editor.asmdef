@@ -2,7 +2,9 @@
     "name": "RPGFramework.Battle.Editor",
     "rootNamespace": "RPGFramework.Battle.Editor",
     "references": [
-        "RPGFramework.Battle"
+        "RPGFramework.Battle",
+        "RPGFramework.Battle.SharedTypes",
+        "RPGFramework.Hashing"
     ],
     "includePlatforms": [
         "Editor"

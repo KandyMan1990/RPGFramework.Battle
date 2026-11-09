@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace RPGFramework.Battle.Loaders
 {
-    /// <summary>Loads a battle's arena by its number, looking it up in the arena database.</summary>
+    /// <summary>Loads a battle's arena by the hash of its name, looking it up in the arena database.</summary>
     public interface IBattleArenaLoader
     {
-        /// <summary>Loads the arena with this number into the scene, returning its root.</summary>
-        Task<GameObject> LoadAsync(int arenaId);
+        /// <summary>Loads the arena named by <paramref name="nameHash" /> into the scene, returning its root.</summary>
+        Task<GameObject> LoadAsync(ulong nameHash);
 
         /// <summary>Takes the arena loaded last out of the scene.</summary>
         Task UnloadAsync();
@@ -26,9 +26,9 @@ namespace RPGFramework.Battle.Loaders
             m_ArenaPresentation = arenaPresentation;
         }
 
-        Task<GameObject> IBattleArenaLoader.LoadAsync(int arenaId)
+        Task<GameObject> IBattleArenaLoader.LoadAsync(ulong nameHash)
         {
-            BattleArenaDefinition arenaDefinition = m_ArenaDatabase.Get(arenaId);
+            BattleArenaDefinition arenaDefinition = m_ArenaDatabase.Get(nameHash);
             return m_ArenaPresentation.LoadAsync(arenaDefinition);
         }
 
