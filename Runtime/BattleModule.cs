@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using RPGFramework.Audio;
+using RPGFramework.Battle.Databases;
 using RPGFramework.Battle.Loaders;
 using RPGFramework.Battle.Providers;
 using RPGFramework.Battle.SharedTypes;
@@ -30,6 +31,7 @@ namespace RPGFramework.Battle
         private readonly ISfxPlayer                m_SfxPlayer;
         private readonly IBattleAudioProvider      m_AudioProvider;
         private readonly IBattleArenaLoader        m_ArenaLoader;
+        private readonly IBattleEncounterDatabase  m_EncounterDatabase;
         private readonly ICountdownStore           m_CountdownStore;
         private readonly IBattleModeStore          m_BattleModeStore;
         private readonly CountdownLabel            m_Countdown;
@@ -37,6 +39,7 @@ namespace RPGFramework.Battle
 
         private InputAdapter m_InputAdapter;
         private BattleArgs   m_BattleArgs;
+        private BattleFlags  m_Flags;
         private bool         m_CarriesCountdown;
 
         public BattleModule(ICoreModule               coreModule,
@@ -48,6 +51,7 @@ namespace RPGFramework.Battle
                             ISfxPlayer                sfxPlayer,
                             IBattleAudioProvider      battleAudioProvider,
                             IBattleArenaLoader        arenaLoader,
+                            IBattleEncounterDatabase  encounterDatabase,
                             ICountdownStore           countdownStore,
                             IBattleModeStore          battleModeStore,
                             IModuleScene              moduleScene)
@@ -61,6 +65,7 @@ namespace RPGFramework.Battle
             m_SfxPlayer                = sfxPlayer;
             m_AudioProvider            = battleAudioProvider;
             m_ArenaLoader              = arenaLoader;
+            m_EncounterDatabase        = encounterDatabase;
             m_CountdownStore           = countdownStore;
             m_BattleModeStore          = battleModeStore;
             m_Countdown                = new CountdownLabel(countdownStore);
@@ -80,8 +85,12 @@ namespace RPGFramework.Battle
 
             m_BattleArgs = m_BattleArgsStore.Args;
 
+            BattleEncounterDefinition encounter = m_EncounterDatabase.Get(m_BattleArgs.Encounter);
+
+            m_Flags = m_BattleArgs.Flags | encounter.Flags;
+
             m_CarriesCountdown = m_CountdownStore.IsShown &&
-                                 (m_BattleArgs.HasFlag(BattleFlags.INHERIT_COUNTDOWN_TIMER) || (m_BattleModeStore.Mode & BattleFlags.INHERIT_COUNTDOWN_TIMER) != 0);
+                                 (HasFlag(BattleFlags.INHERIT_COUNTDOWN_TIMER) || (m_BattleModeStore.Mode & BattleFlags.INHERIT_COUNTDOWN_TIMER) != 0);
 
             if (m_CarriesCountdown)
             {
@@ -143,6 +152,11 @@ namespace RPGFramework.Battle
             SetBattleComplete(result);
         }
 
+        private bool HasFlag(BattleFlags flag)
+        {
+            return (m_Flags & flag) == flag;
+        }
+
         private bool HasRunOutOfTime()
         {
             return m_CarriesCountdown && m_CountdownStore.Seconds == 0;
@@ -200,13 +214,13 @@ namespace RPGFramework.Battle
 
             // at this point we're at state == BattleCompleteState.VICTORY
 
-            if (!m_BattleArgs.HasFlag(BattleFlags.DISABLE_VICTORY_FANFARE))
+            if (!HasFlag(BattleFlags.DISABLE_VICTORY_FANFARE))
             {
                 VictorySequenceAsync().FireAndForget();
                 return;
             }
 
-            if (!m_BattleArgs.HasFlag(BattleFlags.DISABLE_ITEM_AND_EXP_GAIN))
+            if (!HasFlag(BattleFlags.DISABLE_ITEM_AND_EXP_GAIN))
             {
                 TransitionToSpoilsScreenAsync().FireAndForget();
                 return;
@@ -228,7 +242,7 @@ namespace RPGFramework.Battle
             // TODO: await any victory dances/ui popup etc
             await Awaitable.WaitForSecondsAsync(4f);
 
-            if (!m_BattleArgs.HasFlag(BattleFlags.DISABLE_ITEM_AND_EXP_GAIN))
+            if (!HasFlag(BattleFlags.DISABLE_ITEM_AND_EXP_GAIN))
             {
                 await TransitionToSpoilsScreenAsync();
                 return;
