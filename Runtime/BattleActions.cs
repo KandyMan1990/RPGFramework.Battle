@@ -2,10 +2,12 @@
 using System;
 using System.Collections.Generic;
 using RPGFramework.Core.Input;
+using Unity.Scripting.LifecycleManagement;
 
 namespace RPGFramework.Battle
 {
     /// <summary>The actions the battle reads, declared for the editor's check of the battle scene's map.</summary>
+    [NoAutoStaticsCleanup]
     internal sealed class BattleActions : IRequiredActions
     {
         private static readonly RequiredAction[] m_Required =

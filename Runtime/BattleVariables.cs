@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 using RPGFramework.Core.Memory;
 using RPGFramework.Core.SharedTypes;
+using Unity.Scripting.LifecycleManagement;
 
 namespace RPGFramework.Battle
 {
     /// <summary>
     /// The variables the battle module requires of every game's map.
     /// </summary>
+    [NoAutoStaticsCleanup]
     internal sealed class BattleVariables
 #if UNITY_EDITOR
         : IRequiredVariables
