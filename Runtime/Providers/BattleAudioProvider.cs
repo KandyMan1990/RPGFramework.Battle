@@ -13,7 +13,8 @@ namespace RPGFramework.Battle.Providers
         ulong VictoryMusicId { get; }
     }
 
-    [CreateAssetMenu(menuName = "RPG Framework/Audio/Battle Audio Provider", fileName = "Battle Audio Provider")]
+    // Numbered with the Audio menu's other entries, in name order.
+    [CreateAssetMenu(menuName = "RPG Framework/Audio/Battle Audio Provider", fileName = "Battle Audio Provider", order = 0)]
     public sealed class BattleAudioProvider : ScriptableObject, IBattleAudioProvider
     {
         [SerializeField]
